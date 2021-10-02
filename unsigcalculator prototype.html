@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unsig Calculator Prototype</title>
+    <script> 
+    function generateForm() {
+        
+        // str and select hold HTML outputs
+        let str ="";
+        let select = "";
+        let numsig = document.forms["unsigInputs"]["fnumsigs"].value;
+        let propertiesLabels = ["Rotations","Multipliers","Distributions","Colors"];
+        let ind = [document.forms["unsigInputs"]["findex0"].value, document.forms["unsigInputs"]["findex1"].value];
+
+        let numprops = [document.forms["unsigInputs"]["fnumprops0"].value, document.forms["unsigInputs"]["fnumprops1"].value];
+        ////console.log(numprops[0]);
+        ////console.log(numprops[1]);
+
+        // First for Loop iterates each unsig input form
+        for (let indexi = 0; indexi < numsig; indexi++) {
+            // i representing the unsig input number will be the first in the property input indexes
+            let i = indexi;
+
+            // Second for loop iterates the properties within each input form
+            for (let indexj = 0; indexj < propertiesLabels.length; indexj++) {
+                let j = indexj;
+                
+                // Third for loop iterates properties 6  times (replace with nump_props eventually)
+                for (let indexk = 0; indexk < numprops[i]; indexk++) {
+                    
+                    let selectArray = [
+                        `<select id="Rotations${i}${indexk}" name="fRotations${i}${indexk}">
+                            <option value="null">null</option>
+                            <option value="0">0</option>
+                            <option value="1">90</option>
+                            <option value="2">180</option>
+                            <option value="3">270</option>    
+                        </select>`,
+                        `<select id="Multipliers${i}${indexk}" name="fMultipliers${i}${indexk}">
+                            <option value="null">null</option>
+                            <option value="0">0.5</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">4</option>
+                        </select>`,
+                        `<select id="Distributions${i}${indexk}" name="fDistributions${i}${indexk}">
+                            <option value="null">null</option>
+                            <option value="0">None</option>
+                            <option value="1">Normal</option>
+                            <option value="2">CDF</option>
+                        </select>`,
+                        `<select id="Colors${i}${indexk}" name="fColors${i}${indexk}">
+                            <option value="null">null</option>
+                            <option value="0">Red</option>
+                            <option value="1">Green</option>
+                            <option value="2">Blue</option>
+                        </select>`
+                    ];
+
+                    select += selectArray[j];
+                }
+
+                // concatenate property inputs
+                str += propertiesLabels[indexj] + select + "<br>";
+                select = "";
+
+            }
+
+            document.getElementById(`unsig${indexi+1}`).innerHTML = 
+            `<h2>Unsig ${indexi+1}</h2> 
+
+            Index ${i+1}: <input type="text" name = "index${i}" id="findex${i}" value = "${ind[i]}"> <br>
+            numprops ${i+1}: <input type="number" name="numprops${i}" id="fnumprops${i}" value = "${numprops[i]}"> <br>
+
+            ${str}`;
+            
+            // Must clear the string between each property
+            str = "";
+        }
+
+        // Add calculate button to end of form
+        document.getElementById("buttondiv").innerHTML = `<input type="button" value="Calculate" onclick="calculate();return false;">`;
+
+    }
+
+    function calculate() {
+    
+    let numsig = document.forms["unsigInputs"]["fnumsigs"].value;
+    let ind = [document.forms["unsigInputs"]["findex0"].value, document.forms["unsigInputs"]["findex1"].value];
+    let numprops = [document.forms["unsigInputs"]["fnumprops0"].value, document.forms["unsigInputs"]["fnumprops1"].value];
+    let minprops;
+    let maxprops;
+
+    //set the number of properties for the output unsig to the greater value of the input numprops
+    if (numprops[0] > numprops[1]) {
+        maxprops = numprops[0];
+        minprops = numprops[1];
+    } else {
+            maxprops = numprops[1];
+            minprops = numprops[0];
+        }
+    
+    // index label for output unsig    
+    ind[2] = `${ind[0]}+${ind[1]}`;
+
+    let propertiesLabels = ["Rotations","Multipliers","Distributions","Colors"];
+    let RotationsArray = [`0`,`90`,`180`,`270`];
+    let MultipliersArray = [`0.5`,`1`,`2`,`4`];
+    let DistributionsArray = [`"None"`,`"Normal"`,`"CDF"`];
+    let ColorsArray = [`"Red"`,`"Green"`,`"Blue"`];
+    let propertiesValuesArray = [RotationsArray, MultipliersArray, DistributionsArray, ColorsArray];
+
+    let unsigs = [];
+    let propertiesVector = [];
+    
+    // Translate unsig inputs from form into matrices
+    // iterate through each unsig
+    for (let indexi = 0; indexi < numsig; indexi++) {
+        let i = indexi;
+        unsigs[i] = [];
+        // iterate through each numprops per unsig
+        for (let indexj = 0; indexj < numprops[i]; indexj++) {         
+            let j = indexj;
+            propertiesVector[j]=[];
+            // iterate through properties to form a properties vector
+            for (let indexk = 0; indexk < 4; indexk++) {              
+                let k = indexk;
+                propertiesVector[j].push(document.forms["unsigInputs"][`${propertiesLabels[k]}${i}${j}`].value);
+            }         
+            unsigs[i].push(propertiesVector[j]);                     
+        }      
+    } // unsigs are now represented as matrices with numprops number of vectors
+
+    // Now we use modular arithmetic to "add" each of these vectors together and create a new unsig matrix  
+    // unsigs[unsig][numprops][properties]
+    unsigs[2] = [];
+    // iterate through numprops 
+    for (let indexj = 0; indexj < maxprops; indexj++) {
+        let j = indexj;
+        propertiesVector[j]=[];
+        // iterate through properties to form a new output properties vector
+        for (let indexk = 0; indexk < 4; indexk++) {           
+            let k = indexk;
+            // make numprops comparison here
+            if (minprops == maxprops) {
+                var calculatedValue = Number(unsigs[0][j][k]) + Number(unsigs[1][j][k]);            
+            } else {
+                    if (numprops[0] > numprops[1]) {
+                        var calculatedValue = Number(unsigs[0][j][k]);
+                    } else {
+                        var calculatedValue = Number(unsigs[1][j][k]);
+                        }
+                }
+            if (k == 0 || k == 1){ //if properties are Multipliers or Rotations
+                calculatedValue = calculatedValue % 4;
+            } else {
+                    calculatedValue = calculatedValue % 3;
+                }
+            var decode = propertiesValuesArray[k];           
+            propertiesVector[j].push(decode[calculatedValue]);
+        }       
+        // append new output vectors to new output unsig matrix
+        unsigs[2].push(propertiesVector[j]);             
+    }
+
+    // iterate through properties to concatenate string 
+    for (let index = 0; index < propertiesLabels.length; index++) {   
+        var final = 
+            `'index' : ${ind[2]} <br>
+            'nump_props': ${maxprops} <br>`;    
+        for (let indexi = 0; indexi < propertiesLabels.length; indexi++) {            
+            var i = indexi;
+            var str = `'${propertiesLabels[i]}' : [`;
+            var finalproperties = "";
+            // iterate through numprops
+            for (let indexj = 0; indexj < unsigs[2].length; indexj++) {
+                var j = indexj;
+                str += `${unsigs[2][j][i]}, `               
+            }
+            finalproperties += `${str} ] <br>`;
+            console.log(finalproperties);           
+            final += `${finalproperties}`;
+        }
+    }
+
+    // output formatted unsig parameters to HTML
+    document.getElementById("unsig3").innerHTML = 
+        `<h2> Calculated Unsig Output </h2>
+        ${final}`;      
+} // End function calculate()
+    </script>
+</head>
+
+<body>
+<h1>Unsig Calculator</h1>
+
+<Form id="unsigInputs">
+    <div id="numsigsdiv">
+        How Many Unsigs? 
+        <select name="fnumsigs" id="numsigsselect">
+            <option value="2">2</option>
+        </select>
+        <input type="button" onclick="generateForm(); return false;" value="Generate Form">
+    </div>
+    <br>
+
+    <div id="unsig1">
+        Index 1: <input type="text" name = "index0" id = "findex0"> <br>
+        numprops 1: <select name="numprops0" id="fnumprops0">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option> 
+            <option value="5">5</option> 
+            <option value="6">6</option> 
+        </select><br>
+
+    </div>
+    <br>
+
+    <div id="unsig2">
+        Index 2: <input type="text" name = "index1" id = "findex1"> <br>
+        numprops 2: <select name="numprops1" id="fnumprops1">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option> 
+            <option value="5">5</option> 
+            <option value="6">6</option> 
+        </select><br>
+    </div>
+    <br>
+
+    <div id="buttondiv"></div>
+    <br>
+
+</Form>
+
+<div id="unsig3"></div>
+</body>
+</html>
+
