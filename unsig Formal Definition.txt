@@ -1,0 +1,88 @@
+Formal Definition of Operations on Unsigs
+
+The construction of unsigs and their properties:
+
+unsig = {'index': i,
+         'num_props': n,
+         'properties': {
+             'multipliers'   : [m1,...mn],
+             'colors'        : [c1,...cn],
+             'distributions' : [d1,...dn],
+             'rotations'     : [r1,...rn]
+                         }
+        }
+        
+        
+An Unsig can also be represented as a matrix with num_props (n) number of vectors:
+
+[m1,c1,d1,r1]
+.
+.
+.
+[mn,cn,dn,rn]
+
+
+--------------
+
+properties within the original set of unsigs have the following possible set of parameters:
+
+'num_props' 	: i<6
+'multipliers'   : [0.5,1,2,4]
+'colors'        : ["Red","Green","Blue"]
+'distributions' : ["None", "Normal", "CDF"]
+'rotations'     : [0,90,180,270]
+
+-------------
+
+The definition of a "modular" operation on two single vector unsigs:
+
+u1 = [v1] = [m1, c1, d1, r1]
+u2 = [v2] = [m2, c2, d2, r1]
+
+Each parameter is assigned a number position in a ring:
+
+'colors'	:  ["Red"=0, "Green"=1, "Blue"=2]
+'multipliers'   : ["0.5"=0, "1"=1, "2"=2, "4" = 3]
+'distributions' : ["None"=0, "Normal"=1, "CDF"=2]
+'rotations'     : ["0"=0, "90"=1, "180"=2,"270"=3]
+
+Addition is performed with modular arithmetic:
+
+Red + Red = 0 + 0 = 0 = Red
+Red + Blue = 0 + 2 = 3mod3 = 0 = Red
+Blue + Blue = 2 + 2 = 4mod3 = 1 = Green
+
+and so on...
+
+so u1+u2 = [m1+m2, C1+c2, d1+d2, r1+r2]
+
+
+-------------
+
+Considerations:
+
+These attributions are essentially arbitrary. Different attributions will likely result in very different outputs and may not reveal any fundamental structure that underlies the relationships between unsigs.
+
+I am assuming that it does not matter in which order the vectors are arranged within the matrix that defines each unsig and so operating on multi-vector unsigs creates another arbitrary aspect to the calculation. Rearranging the order of the vectors will result in different outputs.
+
+Other operations will be defined, which may reveal more fundamental structure within the unsig set. Such as simple composition: 
+
+if u1 = [va, vb] and u2 = [vc, vd] 
+
+then u1∘u2 = [va, vb, vc, vd] 
+
+This composition operation is a more natural and fundamental one that is not arbitrary and both makes explicit the construction of higher num_prop unsigs out of lower ones, and also allows for brand new num_props > 6 unsigs which were not a part of the original set. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
