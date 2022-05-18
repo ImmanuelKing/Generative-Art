@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+</head>
+<body>
+
+<form id="inputs">
+    Width<input type="number" name="width" value="500"><br>
+    Divisions<input type="number" name="divisions" value="3"><br>
+    Design<textarea name="design">0123456789</textarea><br>
+</form>
+
+<div id="canvasDiv"></div>
+<br>
+
+<script>
+    // set color variables
+    var white = "#FFFFFF";
+    var black = "#000000";
+    var red = "#FF0000";
+    var blue = "#0000FF";
+    var yellow = "#FFFF00";
+    var green = "#00FF00";
+    var indigo = "#4B0082";
+    var violet = "#9400D3";
+    var orange = "#FF7F00";
+    //--------------------
+
+    //import variables from form "inputs". force integer type to prevent bugs.
+    var w=parseInt(document.forms["inputs"]["width"].value);
+    var designRaw = document.forms["inputs"]["design"].value;
+    var d=parseInt(document.forms["inputs"]["divisions"].value);
+
+    // set canvas element based on "width"
+    var h = w;
+    document.getElementById("canvasDiv").innerHTML = `<canvas id="canvasElement" width="${w}" height="${h}" style="border:1px solid grey"></canvas>`;
+    var x = document.getElementById("canvasElement");
+    var ctx = x.getContext("2d");
+    
+    // failsafe to avoid infinite loop/crash.
+    console.log(typeof d);
+    if (d>w){d=w};
+    console.log(d);
+
+    // pixel coordinate scalar
+    var xdim = Math.floor(w/d);
+    var ydim = Math.floor(h/d);
+
+    // total number of squares
+    var area = d*d;
+
+    // arrays to hold pixel coordinates
+    var pixelX=[];
+    var pixelY=[];
+ 
+    console.log(`Total Number of Squares: ${area}`);
+
+    // push xy coordinates into arrays 
+    for (let i=0; i<area; i++){
+        
+        pixelX[i] = (i%d)*xdim;
+        pixelY[i] = (Math.floor(i/d))*ydim;
+    }
+  
+    // declare design array and push each character from design string into the array
+    var designArray = [];
+    var designLength = designRaw.length
+
+    for (let i=0; i<designLength ; i++){
+        j=i+1;
+        designArray[i] = designRaw.slice(i,j);       
+        console.log(`designArray[${i}] = ${designArray[i]}`);
+    }
+
+    // map design array values to colors
+    for (let i=0; i<area; i++){
+
+        switch (designArray[i]) {
+            case "0": ctx.fillStyle = black;
+            break;
+            case "1": ctx.fillStyle = white;
+            break;
+            case "2": ctx.fillStyle = red;
+            break;
+            case "3": ctx.fillStyle = orange;
+            break;
+            case "4": ctx.fillStyle = yellow;
+            break;
+            case "5": ctx.fillStyle = green;
+            break;
+            case "6": ctx.fillStyle = blue;
+            break;
+            case "7": ctx.fillStyle = indigo;
+            break;
+            case "8": ctx.fillStyle = violet;
+            break;
+            case "9": ctx.fillStyle = white;
+            break;
+            default: ctx.fillStyle = white;
+        }
+
+        //console.log(`color: ${ctx.fillStyle}`);
+        //console.log(`x = ${pixelX[i]}`);
+        //console.log(`y = ${pixelY[i]}`);
+
+        // Draw square in canvas. Color determined by design array value. 
+        // Location determined by values in PixelXY arrays, size of square determined by xydim
+        ctx.fillRect(pixelX[i], pixelY[i], xdim, ydim);
+    }
+
+
+</script>
+
+
+<input type="button" value="Reload" onclick="window.location.reload()">
+
+
+</body>
+</html>
